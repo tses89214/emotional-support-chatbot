@@ -6,6 +6,7 @@ import time
 import logging
 
 from flask import Flask, request, abort
+from dotenv import load_dotenv
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -21,6 +22,9 @@ from src.models.user import User
 from src.models.log import Log
 from src.models.models import DynamoDBHandler
 from src.models.openai_agent import OpenAIAgent
+
+# env
+load_dotenv('env/.env')
 
 # app
 app = Flask(import_name=__name__)
@@ -45,6 +49,11 @@ history = {}
 
 # logger
 logger = logging.getLogger(__name__)
+
+
+@app.route("/", methods=['GET'])
+def health_check():
+    return 'Ok'
 
 
 @app.route("/callback", methods=['POST'])
