@@ -49,7 +49,7 @@ class DynamoDBHandler:
         Set user's prompt to Users table.
         """
         try:
-            response = self.db.user_table.put_items(Item=user.to_item)
+            response = self.db.user_table.put_item(Item=user.to_item)
             logger.info("PutItem succeeded: %s", response)
 
         except ClientError as err:
