@@ -49,7 +49,7 @@ class DynamoDBHandler:
         Set user's prompt to Users table.
         """
         try:
-            response = self.db.user_table.put_item(Item=user.to_item)
+            response = self.db.user_table.put_item(Item=user.to_item())
             logger.info("PutItem succeeded: %s", response)
 
         except ClientError as err:
@@ -82,6 +82,7 @@ class DynamoDBHandler:
                 ScanIndexForward=False
             )
             items = response['Items']
+            print("history here: " + str(items))
             return items
 
         except ClientError as err:
@@ -92,7 +93,7 @@ class DynamoDBHandler:
         Write log to log table.
         """
         try:
-            response = self.db.log_table.put_items(Item=log.to_item)
+            response = self.db.log_table.put_item(Item=log.to_item())
             logger.info("PutItem succeeded: %s", response)
 
         except ClientError as err:

@@ -37,6 +37,6 @@ class User:
         Convert object into items format for dynamoDB.
         """
         return {
-            'user_id': User.user_id,
-            'prompt': User.prompt
+            'user_id': self._user_id,
+            'prompt': self._prompt
         }

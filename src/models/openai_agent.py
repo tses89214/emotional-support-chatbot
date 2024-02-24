@@ -9,7 +9,6 @@ import requests
 
 from src.models.user import User
 
-
 class OpenAIAgent:
     """
     A class to interact with Open AI API.
@@ -97,7 +96,10 @@ class OpenAIAgent:
             'model': self.model_engine,
             'messages': messages
         }
-        return self._request('POST', '/chat/completions', body=json_body)
+        print('json_body' + str(json_body))
+        response = self._request('POST', '/chat/completions', body=json_body)
+        print(response)
+        return response
 
     def log_formatting(self, prompt, history, limit=8):
         """
@@ -107,11 +109,14 @@ class OpenAIAgent:
         messages.append(
             {'role': 'system', 'content': prompt}
         )
-        for item in history[-limit:]:
-            messages.append(
-                {'role': 'user', 'content': item['input']}
-            )
-            messages.append(
-                {'role': 'assistant', 'content': item['output']}
-            )
-        return history
+        if len(history):
+            for item in history[-limit:]:
+                messages.append(
+                    {'role': 'user', 'content': item['input']}
+                )
+                messages.append(
+                    {'role': 'assistant', 'content': item['output']}
+                )
+                
+        print('message here ' + str(messages))
+        return messages

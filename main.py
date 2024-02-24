@@ -5,6 +5,7 @@ import os
 import time
 import logging
 import json
+import re
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -29,7 +30,7 @@ handler = WebhookHandler(channel_secret=os.getenv(key='LINE_CHANNEL_SECRET'))
 # chatGPT
 openai_agent = OpenAIAgent(
     api_key=os.getenv(key='DEFAULT_API_KEY'),
-    model_engine=os.getenv(key='MODEL_ENGINE'))
+    model_engine=os.getenv(key='OPENAI_MODEL_ENGINE'))
 
 default_prompt = os.getenv(key='DEFAULT_PROMPT')
 
@@ -58,8 +59,10 @@ def lambda_handler(event, context):
 
         try:
             if text.startswith('/設定指令'):
-                pass
-                # we add at next version.
+                prompt = re.sub('/設定指令', '', text)
+                users_prompt[user_id] = prompt
+                dynamodb.set_user(User(user_id=user_id, prompt=prompt))
+                msg = TextSendMessage(text='設定完成')
             else:
                 # check memory
                 if not history.get(user.user_id):
@@ -71,23 +74,25 @@ def lambda_handler(event, context):
                         history=history[user.user_id],
                         text=text
                     )
+                print(' response in main ' + str(response))
+                response_text = response['choices'][0]['message']['content']
 
                 # pylint: disable=broad-exception-raised
                 if not is_successful:
                     raise BaseException(error_message)
 
-                msg = TextSendMessage(text=response)
+                msg = TextSendMessage(text=response_text)
                 dynamodb.write_log(
                     Log(
                         timestamp=int(time.time()),
                         user_id=user_id,
                         prompt=users_prompt[user_id],
                         input_=text,
-                        output=response))
+                        output=response_text))
 
         # pylint: disable=broad-exception-caught
         except Exception as error:
-            logger.error(str(error))
+            logger.error(str(error),exc_info=True)
 
             if str(error).startswith('Incorrect API key provided'):
                 msg = TextSendMessage(text='OpenAI API Token 有誤，請重新註冊。')
