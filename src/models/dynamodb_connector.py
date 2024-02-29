@@ -31,9 +31,5 @@ class DynamoDBConnector:
         return self._log_table
 
     def _get_table(self, table_name):
-        try:
-            table = self._dynamodb.Table(table_name)
-            return table
-        except Exception as e:
-            raise ValueError(
-                f"Error connecting to table '{table_name}': {e}") from e
+        table = self._dynamodb.Table(table_name)
+        return table

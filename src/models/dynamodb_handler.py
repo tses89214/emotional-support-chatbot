@@ -82,7 +82,6 @@ class DynamoDBHandler:
                 ScanIndexForward=False
             )
             items = response['Items']
-            print("history here: " + str(items))
             return items
 
         except ClientError as err:

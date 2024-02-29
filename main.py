@@ -74,7 +74,6 @@ def lambda_handler(event, context):
                         history=history[user.user_id],
                         text=text
                     )
-                print(' response in main ' + str(response))
                 response_text = response['choices'][0]['message']['content']
 
                 # pylint: disable=broad-exception-raised
