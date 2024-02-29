@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 
 from src.models.user import User
 from src.models.log import Log
-from src.models.dynamodb import DynamoDB
+from src.models.dynamodb_connector import DynamoDBConnector
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class DynamoDBHandler:
         Params:
             resource: A Boto3 DynamoDB resource.
         """
-        self.db = DynamoDB(region_name=region_name)
+        self.db = DynamoDBConnector(region_name=region_name)
 
     def get_user(self, user_id: str) -> User:
         """

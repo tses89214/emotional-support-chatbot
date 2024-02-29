@@ -5,7 +5,7 @@ dynamoDB connector.
 import boto3
 
 
-class DynamoDB:
+class DynamoDBConnector:
     """
     DynamoDB connector for handling interactions with Amazon DynamoDB.
 
