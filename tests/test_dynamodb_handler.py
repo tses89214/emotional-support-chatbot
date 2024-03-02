@@ -4,10 +4,9 @@ import boto3
 from src.models.user import User
 from src.models.log import Log
 from src.models.dynamodb_handler import DynamoDBHandler
-from tests.fixture import mock_env_aws_auth
  
 @mock_aws
-def test_dynamodb_handler(mock_env_aws_auth):
+def test_dynamodb_handler():
     region = 'ap-northeast-1'
     dynamodb = boto3.resource('dynamodb',region_name = region)
 
@@ -53,7 +52,7 @@ def test_dynamodb_handler(mock_env_aws_auth):
 
     # test write user
     test_user = User(user_id='123abc',prompt='test_prompt')
-    handler.set_user(test_user)
+    handler.add_user(test_user)
 
     # test get user
     response, user = handler.get_user(user_id= '123abc')
