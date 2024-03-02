@@ -22,6 +22,7 @@ jobs:
 
       - name: Run test
         run: pytest
+        working-directory: /
 
   package:
     needs: test
