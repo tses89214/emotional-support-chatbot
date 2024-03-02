@@ -19,7 +19,7 @@ from linebot.models import (
 
 from src.models.user import User
 from src.models.log import Log
-from src.models.models import DynamoDBHandler
+from src.models.dynamodb_handler import DynamoDBHandler
 from src.models.openai_agent import OpenAIAgent
 
 # line
@@ -36,7 +36,7 @@ default_prompt = os.getenv(key='DEFAULT_PROMPT')
 
 # dynamoDB
 dynamodb = DynamoDBHandler(region_name='ap-northeast-1')
-users_prompt = dynamodb.load_all_user()
+users_prompt = {}
 history = {}
 
 # logger
@@ -51,9 +51,14 @@ def lambda_handler(event, context):
         """
         user_id = event.source.user_id
         if not users_prompt.get(user_id):
-            users_prompt[user_id] = default_prompt
-            dynamodb.set_user(User(user_id=user_id, prompt=default_prompt))
-        user = User(user_id=user_id, prompt=users_prompt[user_id])
+            response, user = dynamodb.get_user(user_id)
+            if response:
+                users_prompt[user.user_id] = user.prompt
+            else:
+                user = User(user_id=user_id, prompt=default_prompt) 
+                dynamodb.set_user(user)
+                users_prompt[user_id] = default_prompt
+
         text = event.message.text.strip()
         logger.info('%s: %s', user_id, text)
 
@@ -143,5 +148,5 @@ def lambda_handler(event, context):
         }
     return {
         'statusCode': 200,
-        'body': json.dumps("Hello from Lambda!")
+        'body': "ok"
     }

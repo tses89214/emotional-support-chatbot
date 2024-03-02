@@ -38,8 +38,11 @@ class DynamoDBHandler:
             response = self.db.user_table.query(
                 KeyConditionExpression=Key('user_id').eq(user_id)
             )
-            item = response['Items'][0]
-            return User(user_id=item['user_id'], prompt=item['prompt'])
+            if response['Items']:
+                item = response['Items'][0]
+                return True, User(user_id=item['user_id'], prompt=item['prompt'])
+            else:
+                return False, None
 
         except ClientError as err:
             self._handle_error("get_user", err)
@@ -54,20 +57,6 @@ class DynamoDBHandler:
 
         except ClientError as err:
             self._handle_error("set_user", err)
-
-    def load_all_user(self):
-        """
-        Load all users prompt when system up.
-        """
-        try:
-            response = self.db.user_table.scan()
-            users_prompt = {}
-            for item in response['Items']:
-                users_prompt[item['user_id']] = item['prompt']
-            return users_prompt
-
-        except ClientError as err:
-            self._handle_error("get_user", err)
 
     def get_log(self, user: User, n: int = 10):
         """
@@ -108,7 +97,7 @@ class DynamoDBHandler:
         """
         logger.error(
             "Meet exception on %s: %s",
-            method_name, err.response['Error']['Message'])
+            method_name, err.response['Error']['Message'],exc_info=True)
 
         # pylint: disable=broad-exception-raised
         raise Exception("Meet dynamoDB exception.") from err
