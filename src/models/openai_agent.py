@@ -3,7 +3,6 @@ The `OpenAIAgent` class is a Python class
 that interacts with the OpenAI API to perform chat completions.
 """
 from typing import List, Dict
-import traceback
 
 import requests
 
@@ -42,24 +41,18 @@ class OpenAIAgent:
                 error message (str)
                 )
         """
-        try:
-            if method == 'GET':
-                response = requests.get(
-                    f'{self.base_url}{endpoint}', headers=self.headers)
-            elif method == 'POST':
-                if body:
-                    self.headers['Content-Type'] = 'application/json'
-                response = requests.post(
-                    f'{self.base_url}{endpoint}',
-                    headers=self.headers, json=body)
-            response = response.json()
-            if response.get('error'):
-                return False, {}, response.get('error', {}).get('message')
-
-        # pylint: disable=broad-exception-caught
-        except Exception as e:
-            error_message = traceback.format_exc()
-            return False, {}, f'{str(e), {error_message}}'
+        if method == 'GET':
+            response = requests.get(
+                f'{self.base_url}{endpoint}', headers=self.headers)
+        elif method == 'POST':
+            if body:
+                self.headers['Content-Type'] = 'application/json'
+            response = requests.post(
+                f'{self.base_url}{endpoint}',
+                headers=self.headers, json=body)
+        response = response.json()
+        if response.get('error'):
+            return False, {}, response.get('error', {}).get('message')
 
         return True, response, None
 
@@ -96,9 +89,7 @@ class OpenAIAgent:
             'model': self.model_engine,
             'messages': messages
         }
-        print('json_body' + str(json_body))
         response = self._request('POST', '/chat/completions', body=json_body)
-        print(response)
         return response
 
     def log_formatting(self, prompt, history, limit=8):
@@ -117,6 +108,4 @@ class OpenAIAgent:
                 messages.append(
                     {'role': 'assistant', 'content': item['output']}
                 )
-                
-        print('message here ' + str(messages))
         return messages

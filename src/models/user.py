@@ -23,14 +23,14 @@ class User:
         return self._prompt
 
     @prompt.setter
-    def set_prompt(self, prompt: str):
+    def set_prompt(self, new_prompt: str):
         """
         We allow user to set prompt.
 
         Args:
             prompt (str): The prompt want to set.
         """
-        self._prompt = str(prompt)
+        self._prompt = new_prompt
 
     def to_item(self):
         """
