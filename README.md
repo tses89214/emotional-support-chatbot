@@ -18,7 +18,7 @@
 
 ### 系統結構
 
-![系統結構](./docs/images/system_structure.png)
+![系統結構](./docs/images/system_structure.PNG)
 
 主要透過 ChatGPT API 處理回應邏輯，運算資源建構於 AWS Lambda 上，API Gateway 用於接受請求，而 DynamoDB 用於紀錄使用者需求及相關 Log。
 (這裡使用 Lambda 和 dynamoDB 的原因主要是它有 free-trial)
@@ -30,7 +30,7 @@
 1. **Users：** 紀錄使用者ID、以及使用的 prompt。
 2. **Logs：** 紀錄使用者輸入的句子、當下使用的 prompt、ChatGPT 的回應，以及其他相關參數。
 
-![數據結構](./docs/images/data_structure.png)
+![數據結構](./docs/images/data_structure.PNG)
 
 
 ## 限制與假設
