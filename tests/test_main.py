@@ -8,10 +8,10 @@ from linebot.webhook import SignatureValidator
 os.environ['LINE_CHANNEL_ACCESS_TOKEN'] = 'abc'
 os.environ['LINE_CHANNEL_SECRET'] = 'abc'
 from main import lambda_handler
-from tests.fixture import lambda_input,mock_env_aws_auth
+from tests.fixture import lambda_input
  
 @mock_aws
-def test_dynamodb_handler(lambda_input, mock_env_aws_auth, monkeypatch):
+def test_dynamodb_handler(lambda_input, monkeypatch):
     #### perpare data and mock ####
     with requests_mock.Mocker() as m:
 
@@ -21,7 +21,7 @@ def test_dynamodb_handler(lambda_input, mock_env_aws_auth, monkeypatch):
 
         ## mock line chatbot
         m.post('https://api.line.me/v2/bot/message/reply',text = '{"response":"ok"}')
-        def mock_valiate_sigture(*args, **kwargs):
+        def mock_valiate_sigture(*args, **kwargs): 
             return True
         monkeypatch.setattr(SignatureValidator, "validate", mock_valiate_sigture)
 

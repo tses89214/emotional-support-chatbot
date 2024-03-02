@@ -1,5 +1,11 @@
 """
-DocString.
+This serves as the entry point for the Line chatbot.
+Here, we receive user input messages,
+send them to OpenAI for responses,
+and then return those responses to the client.
+
+Currently, we deploy it using AWS Lambda,
+with the lambda_handler function serving as the entry point.
 """
 import os
 import time
@@ -42,31 +48,34 @@ history = {}
 # logger
 logger = logging.getLogger(__name__)
 
-
+#pylint: disable=missing-function-docstring,unused-argument
 def lambda_handler(event, context):
     @handler.add(MessageEvent, message=TextMessage)
     def handle_text_message(event):
         """
         Currently we only received text message,
         """
+
+        # Auth and get user prompt
         user_id = event.source.user_id
         if not users_prompt.get(user_id):
-            response, user = dynamodb.get_user(user_id)
-            if response:
+            susscess, user = dynamodb.get_user(user_id)
+            if susscess:
                 users_prompt[user.user_id] = user.prompt
             else:
                 user = User(user_id=user_id, prompt=default_prompt) 
-                dynamodb.set_user(user)
+                dynamodb.add_user(user)
                 users_prompt[user_id] = default_prompt
 
         text = event.message.text.strip()
         logger.info('%s: %s', user_id, text)
 
+        # business logic
         try:
             if text.startswith('/設定指令'):
                 prompt = re.sub('/設定指令', '', text)
                 users_prompt[user_id] = prompt
-                dynamodb.set_user(User(user_id=user_id, prompt=prompt))
+                dynamodb.add_user(User(user_id=user_id, prompt=prompt))
                 msg = TextSendMessage(text='設定完成')
             else:
                 # check memory

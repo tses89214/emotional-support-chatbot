@@ -76,9 +76,3 @@ def lambda_input():
             "replyToken":"d6af095ca7dd4605840768bde1ff5aab","mode":"active"}]}""", 
             'isBase64Encoded': False
         }
-
-
-@pytest.fixture
-def mock_env_aws_auth(monkeypatch):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "mock_key_id")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "mock_secret")

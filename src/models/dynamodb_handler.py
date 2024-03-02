@@ -1,19 +1,14 @@
-"""
-This module provides a DynamoDBHandler class for
-reading and writing data to DynamoDB, including users and logs.
-"""
+#pylint: disable=missing-module-docstring
 import logging
+from typing import List, Dict, Union
 
 from boto3.dynamodb.conditions import Key
-from botocore.exceptions import ClientError
 
 from src.models.user import User
 from src.models.log import Log
 from src.models.dynamodb_connector import DynamoDBConnector
 
-
 logger = logging.getLogger(__name__)
-
 
 class DynamoDBHandler:
     """
@@ -26,78 +21,75 @@ class DynamoDBHandler:
         Initialize the DynamoDBLogHandler instance.
 
         Params:
-            resource: A Boto3 DynamoDB resource.
+            region_name (str): The region of DynamoDB. Default is ap-northeast-1.
         """
         self.db = DynamoDBConnector(region_name=region_name)
 
     def get_user(self, user_id: str) -> User:
         """
-        Get user's prompt from Users table.
+        Get user's profile from Users table, including id and prompt.
+        
+        Params:
+            user_id (str): user's id.
         """
-        try:
-            response = self.db.user_table.query(
-                KeyConditionExpression=Key('user_id').eq(user_id)
-            )
-            if response['Items']:
-                item = response['Items'][0]
-                return True, User(user_id=item['user_id'], prompt=item['prompt'])
-            else:
-                return False, None
+        response = self.db.user_table.query(
+            KeyConditionExpression=Key('user_id').eq(user_id)
+        )
+        if response['Items']:
+            item = response['Items'][0]
+            return True, User(user_id=item['user_id'], prompt=item['prompt'])
+        else:
+            return False, None
 
-        except ClientError as err:
-            self._handle_error("get_user", err)
-
-    def set_user(self, user: User):
+    def add_user(self, user: User) -> bool:
         """
-        Set user's prompt to Users table.
+        Add user to Users table. If user_id exists, record will be overwrite.
+
+        Params:
+            user (User): an User object.
         """
-        try:
-            response = self.db.user_table.put_item(Item=user.to_item())
-            logger.info("PutItem succeeded: %s", response)
+        response = self.db.user_table.put_item(Item=user.to_item())
+        logger.info("PutItem succeeded: %s", response)
+        return True
 
-        except ClientError as err:
-            self._handle_error("set_user", err)
-
-    def get_log(self, user: User, n: int = 10):
+    def get_log(self, user: User, n: int = 10) \
+        -> List[Dict[str,Union[str,int]]]:
         """
-        Get an user's log from log table.
+        Get n records of an user's log from log table.
+
+        Params:
+            user (User): an User object.
+            n (int): number of record we want to get. Default is 10.
+
+        Returns:
+            items: the logs of an user, like:
+            {
+                "user_id":"abc",
+                "timestamp":123456,
+                "input":"你是誰",
+                "output":"我是 ChatGPT",
+                "prompt":"你是有禮貌的機器人"
+            }
+
+        NOTE:
+            maybe use user_id directly will be better?
         """
-        try:
-            condition = Key('user_id').eq(user.user_id)
+        condition = Key('user_id').eq(user.user_id)
 
-            response = self.db.log_table.query(
-                KeyConditionExpression=condition,
-                Limit=n,
-                ScanIndexForward=False
-            )
-            items = response['Items']
-            return items
-
-        except ClientError as err:
-            self._handle_error("get_user", err)
+        response = self.db.log_table.query(
+            KeyConditionExpression=condition,
+            Limit=n,
+            ScanIndexForward=False
+        )
+        items = response['Items']
+        return items
 
     def write_log(self, log: Log):
         """
         Write log to log table.
-        """
-        try:
-            response = self.db.log_table.put_item(Item=log.to_item())
-            logger.info("PutItem succeeded: %s", response)
-
-        except ClientError as err:
-            self._handle_error("write_log", err)
-
-    def _handle_error(self, method_name: str, err: ClientError):
-        """
-        Handle errors.
 
         Params:
-            method_name: The name of the method where the error occurred.
-            err: The ClientError instance containing error details.
+            log: a log Object.
         """
-        logger.error(
-            "Meet exception on %s: %s",
-            method_name, err.response['Error']['Message'],exc_info=True)
-
-        # pylint: disable=broad-exception-raised
-        raise Exception("Meet dynamoDB exception.") from err
+        response = self.db.log_table.put_item(Item=log.to_item())
+        logger.info("PutItem succeeded: %s", response)

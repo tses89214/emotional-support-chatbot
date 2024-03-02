@@ -12,20 +12,24 @@ def test_openai_agent():
 
         # check_token_valid
         m.get('https://api.openai.com/v1/models', text='{"response":"ok"}')
-        assert agent.check_token_valid()[0] is True
+        assert agent.check_token_valid() is True
 
-        m.get('https://api.openai.com/v1/models', text='{"error":{"message":"meet_error"}}')
-        assert agent.check_token_valid()[0] is False
+        m.get('https://api.openai.com/v1/models',
+                text='{"error":{"message":"meet_error"}}')
+        assert agent.check_token_valid() is False
 
         # chat_completions
-        m.post('https://api.openai.com/v1/chat/completions',text='{"response":"ok"}')
+        m.post('https://api.openai.com/v1/chat/completions',
+                text='{"response":"ok"}')
         assert agent.chat_completions(
             user=User(user_id='test_id',prompt='test_prompt'),
             history=[],
             text='test_input'
         )[0] is True
 
-        m.post('https://api.openai.com/v1/chat/completions', text='{"error":{"message":"meet_error"}}')
+        m.post('https://api.openai.com/v1/chat/completions',
+               text='{"error":{"message":"meet_error"}}')
+        
         assert agent.chat_completions(
             user=User(user_id='test_id',prompt='test_prompt'),
             history=[],
@@ -42,6 +46,6 @@ def test_openai_agent():
                     'output': 'output1',
                     'timestamp': 12345}]
                 ) == \
-            [{'role': 'system', 'content': 'test_prompt'}, 
-            {'role': 'user', 'content': 'input1'}, 
+            [{'role': 'system', 'content': 'test_prompt'},
+            {'role': 'user', 'content': 'input1'},
             {'role': 'assistant', 'content': 'output1'}]
