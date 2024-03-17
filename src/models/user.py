@@ -1,8 +1,9 @@
-#pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring
 class User:
     """
     We define the structure of an user here.
     """
+
     def __init__(self, user_id: str, prompt: str):
         """
         Params:

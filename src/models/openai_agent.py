@@ -1,9 +1,10 @@
-#pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring
 from typing import List, Dict, Tuple
 
 import requests
 
 from src.models.user import User
+
 
 class OpenAIAgent:
     """
@@ -18,7 +19,7 @@ class OpenAIAgent:
         Params:
             api_key (str): The API key obtained from OpenAI.
             model_engine (str): The engine we want to use. 
-                Different engine has different performance and pricing. 
+                Different engine has different performance and pricing.
                 Check for Detail: https://platform.openai.com/docs/models
         """
         self.api_key = api_key
@@ -30,7 +31,7 @@ class OpenAIAgent:
 
     # pylint: disable=missing-timeout
     def _request(self, method: str, endpoint: str, body=None) \
-        -> Tuple[bool, Dict, str]:
+            -> Tuple[bool, Dict, str]:
         """
         Send a request to the OpenAI API.
 
@@ -68,8 +69,8 @@ class OpenAIAgent:
         return self._request('GET', '/models')[0]
 
     def chat_completions(
-            self, user: User, history: List[Dict], text: str) \
-                -> Tuple[bool, Dict, str]:
+        self, user: User, history: List[Dict], text: str) \
+            -> Tuple[bool, Dict, str]:
         """
         Get chat completions from the OpenAI model based on the input messages.
 
@@ -97,7 +98,7 @@ class OpenAIAgent:
                 'finish_reason': 'stop'}],
             'usage': {
                     'prompt_tokens': 26,
-                    'completion_tokens': 31, 
+                    'completion_tokens': 31,
                     'total_tokens': 57},
             'system_fingerprint': 'fp_2b778c6b35'},
             None)
@@ -115,7 +116,7 @@ class OpenAIAgent:
         response = self._request('POST', '/chat/completions', body=json_body)
         return response
 
-    def log_formatting(self, prompt, history) -> List[Dict[str,str]]:
+    def log_formatting(self, prompt, history) -> List[Dict[str, str]]:
         """
         Convert log into chatGPT acceptable history log format.
 
@@ -124,7 +125,12 @@ class OpenAIAgent:
             history (List[Dict]): the log item we get from dynamoDB.
 
         Example:
-            log(user_id='123', prompt='你是有禮貌的機器人', input='hi', output='你好', timestamp)
+            log(
+                user_id='123',
+                prompt='你是有禮貌的機器人',
+                input='hi',
+                output='你好',
+                timestamp=123456)
             ->
             [
                 {'role': 'system', 'content': '你是有禮貌的機器人'},
