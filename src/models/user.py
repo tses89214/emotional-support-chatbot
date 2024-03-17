@@ -27,7 +27,7 @@ class User:
         """
         We allow user to set prompt.
 
-        Args:
+        Params:
             prompt (str): The prompt want to set.
         """
         self._prompt = new_prompt

@@ -34,7 +34,7 @@ class OpenAIAgent:
         """
         Send a request to the OpenAI API.
 
-        Args:
+        Params:
             method: str. The HTTP method to use (GET or POST).
             endpoint: str. API endpoint.
             body: dict. Body of the request.

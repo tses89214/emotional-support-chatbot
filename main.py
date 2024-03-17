@@ -78,7 +78,7 @@ def lambda_handler(event, context):
                 dynamodb.add_user(User(user_id=user_id, prompt=prompt))
                 msg = TextSendMessage(text='設定完成')
             else:
-                # check memory
+                # check history log
                 if not history.get(user.user_id):
                     history[user.user_id] = dynamodb.get_log(user=user, n=10)
 
