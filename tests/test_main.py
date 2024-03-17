@@ -1,5 +1,3 @@
-from tests.fixture import lambda_input
-from main import lambda_handler
 import os
 
 from moto import mock_aws
@@ -7,8 +5,8 @@ import requests_mock
 import boto3
 from linebot.webhook import SignatureValidator
 
-os.environ['LINE_CHANNEL_ACCESS_TOKEN'] = 'abc'
-os.environ['LINE_CHANNEL_SECRET'] = 'abc'
+from tests.fixture import lambda_input
+from main import lambda_handler
 
 
 @mock_aws
