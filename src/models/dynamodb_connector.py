@@ -1,12 +1,15 @@
-#pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring
 import boto3
 from boto3.dynamodb import table
+
+
 class DynamoDBConnector:
     """
     DynamoDB connector provides a simple interface for connecting to DynamoDB.
     Currently, it is designed to work with two tables: 'users' and 'logs'.
     You can modify the class to accommodate additional use cases.
     """
+
     def __init__(self, region_name: str):
         """
         Params:

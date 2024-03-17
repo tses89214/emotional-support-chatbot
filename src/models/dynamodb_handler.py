@@ -1,4 +1,4 @@
-#pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring
 import logging
 from typing import List, Dict, Union
 
@@ -9,6 +9,7 @@ from src.models.log import Log
 from src.models.dynamodb_connector import DynamoDBConnector
 
 logger = logging.getLogger(__name__)
+
 
 class DynamoDBHandler:
     """
@@ -21,14 +22,14 @@ class DynamoDBHandler:
         Initialize the DynamoDBLogHandler instance.
 
         Params:
-            region_name (str): The region of DynamoDB. Default is ap-northeast-1.
+            region_name (str): Region of DynamoDB. Default is ap-northeast-1.
         """
         self.db = DynamoDBConnector(region_name=region_name)
 
     def get_user(self, user_id: str) -> User:
         """
         Get user's profile from Users table, including id and prompt.
-        
+
         Params:
             user_id (str): user's id.
         """
@@ -52,23 +53,24 @@ class DynamoDBHandler:
         logger.info("PutItem succeeded: %s", response)
         return True
 
-    def get_log(self, user: User, n: int = 10) -> List[Dict[str,Union[str,int]]]:
+    def get_log(self, user: User, n: int = 10) \
+            -> List[Dict[str, Union[str, int]]]:
         """
-        Get n records of an user's log from log table.
+        Get n records of an users' from log table.
 
         Params:
             user (User): an User object.
             n (int): number of record we want to get. Default is 10.
 
         Returns:
-            items: the logs of an user, like:
-            {
+            logs of an user (List of Dict), like:
+            [{
                 "user_id":"abc",
                 "timestamp":123456,
                 "input":"你是誰",
                 "output":"我是 ChatGPT",
                 "prompt":"你是有禮貌的機器人"
-            }
+            }]
 
         NOTE:
             maybe use user_id directly will be better?
