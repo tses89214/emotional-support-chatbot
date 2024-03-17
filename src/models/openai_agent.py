@@ -67,7 +67,8 @@ class OpenAIAgent:
         """
         return self._request('GET', '/models')[0]
 
-    def chat_completions(self, user: User, history: List[Dict], text: str) \
+    def chat_completions(
+            self, user: User, history: List[Dict], text: str) \
                 -> Tuple[bool, Dict, str]:
         """
         Get chat completions from the OpenAI model based on the input messages.
@@ -102,7 +103,8 @@ class OpenAIAgent:
             None)
         """
         messages = self.log_formatting(
-            prompt=user.prompt, history=history)
+            prompt=user.prompt, history=history
+        )
         messages.append(
             {'role': 'user', 'content': text}
         )
