@@ -1,11 +1,20 @@
-"""
-This serves as the entry point for the Line chatbot.
-Here, we receive user input messages,
-send them to OpenAI for responses,
-and then return those responses to the client.
+# pylint: disable=broad-exception-caught,missing-function-docstring,broad-exception-raised
 
-Currently, we deploy it using AWS Lambda,
-with the lambda_handler function serving as the entry point.
+"""
+Entry Point - main.py:
+This file acts as the primary gateway for the Line chatbot.
+It handles the reception of user input messages, 
+communication with OpenAI for responses,
+and ultimately dispatches those responses back to the client.
+
+In traditional MVC architecture,
+it recommended to delegate such functionality to a "controller".
+However, given the scale and specific requirements of our ongoing project,
+I've opted to centralize all business logic within main.py for simplicity.
+
+Deployment Note:
+At present, we deploy the application using AWS Lambda,
+where the lambda_handler function serves as the designated entry point.
 """
 import os
 import time
@@ -13,15 +22,10 @@ import logging
 import json
 import re
 
-from linebot import (
-    LineBotApi, WebhookHandler
-)
-from linebot.exceptions import (
-    InvalidSignatureError
-)
-from linebot.models import (
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import \
     MessageEvent, TextMessage, TextSendMessage, AudioMessage, ImageMessage
-)
 
 from src.models.user import User
 from src.models.log import Log
@@ -48,12 +52,12 @@ history = {}
 # logger
 logger = logging.getLogger(__name__)
 
-#pylint: disable=missing-function-docstring,unused-argument
 def lambda_handler(event, context):
     @handler.add(MessageEvent, message=TextMessage)
     def handle_text_message(event):
         """
-        Currently we only received text message,
+        This function act as text message controller,
+        you can find most of business logic here.
         """
 
         # Auth and get user prompt
@@ -70,13 +74,15 @@ def lambda_handler(event, context):
         text = event.message.text.strip()
         logger.info('%s: %s', user_id, text)
 
-        # business logic
         try:
+            # feature1: set users's prompt
             if text.startswith('/設定指令'):
                 prompt = re.sub('/設定指令', '', text)
                 users_prompt[user_id] = prompt
                 dynamodb.add_user(User(user_id=user_id, prompt=prompt))
                 msg = TextSendMessage(text='設定完成')
+
+            # feature2: regular text message response
             else:
                 # check history log
                 if not history.get(user.user_id):
@@ -90,7 +96,6 @@ def lambda_handler(event, context):
                     )
                 response_text = response['choices'][0]['message']['content']
 
-                # pylint: disable=broad-exception-raised
                 if not is_successful:
                     raise BaseException(error_message)
 
@@ -103,7 +108,6 @@ def lambda_handler(event, context):
                         input_=text,
                         output=response_text))
 
-        # pylint: disable=broad-exception-caught
         except Exception as error:
             logger.error(str(error),exc_info=True)
 
@@ -116,14 +120,16 @@ def lambda_handler(event, context):
 
             else:
                 msg = TextSendMessage(
-                    text='系統遇到一些錯誤，請截圖提供以下訊息給管理員。\n' + str(error))
+                    text='系統遇到一些錯誤，請截圖提供以下訊息給管理員。\n' + \
+                         'User ID: ' + user_id + \
+                         'Meet Error: ' + str(error))
 
         line_bot_api.reply_message(event.reply_token, msg)
 
     @handler.add(MessageEvent, message=AudioMessage)
     def handle_audio_message(event):
         """
-        No audio message.
+        We don't accept audio messages at this moment.
         """
         user_id = event.source.user_id
         line_bot_api.reply_message(event.reply_token, '我目前只接受文字訊息，未來敬請期待!')
@@ -132,7 +138,7 @@ def lambda_handler(event, context):
     @handler.add(MessageEvent, message=ImageMessage)
     def handle_image_message(event):
         """
-        No image message.
+        we don't accept image messages at this moment.
         """
         user_id = event.source.user_id
         line_bot_api.reply_message(event.reply_token, '我目前只接受文字訊息，未來敬請期待!')

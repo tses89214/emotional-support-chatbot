@@ -52,8 +52,7 @@ class DynamoDBHandler:
         logger.info("PutItem succeeded: %s", response)
         return True
 
-    def get_log(self, user: User, n: int = 10) \
-        -> List[Dict[str,Union[str,int]]]:
+    def get_log(self, user: User, n: int = 10) -> List[Dict[str,Union[str,int]]]:
         """
         Get n records of an user's log from log table.
 
