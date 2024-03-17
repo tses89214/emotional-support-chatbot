@@ -1,4 +1,8 @@
 import pytest
+import os
+
+os.environ['LINE_CHANNEL_ACCESS_TOKEN'] = 'abc'
+os.environ['LINE_CHANNEL_SECRET'] = 'abc'
 
 
 @pytest.fixture
