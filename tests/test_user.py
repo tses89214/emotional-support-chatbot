@@ -1,11 +1,12 @@
 from src.models.user import User
 
+
 def test_user():
     user = User(
-        user_id = 'test_id',
-        prompt = 'test_prompt'
-        )
-        
+        user_id='test_id',
+        prompt='test_prompt'
+    )
+
     assert user.user_id == 'test_id'
     assert user.prompt == 'test_prompt'
     assert user.to_item() == {

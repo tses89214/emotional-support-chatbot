@@ -3,7 +3,7 @@
 """
 Entry Point - main.py:
 This file acts as the primary gateway for the Line chatbot.
-It handles the reception of user input messages, 
+It handles the reception of user input messages,
 communication with OpenAI for responses,
 and ultimately dispatches those responses back to the client.
 
@@ -52,6 +52,7 @@ history = {}
 # logger
 logger = logging.getLogger(__name__)
 
+
 def lambda_handler(event, context):
     @handler.add(MessageEvent, message=TextMessage)
     def handle_text_message(event):
@@ -67,7 +68,7 @@ def lambda_handler(event, context):
             if susscess:
                 users_prompt[user.user_id] = user.prompt
             else:
-                user = User(user_id=user_id, prompt=default_prompt) 
+                user = User(user_id=user_id, prompt=default_prompt)
                 dynamodb.add_user(user)
                 users_prompt[user_id] = default_prompt
 
@@ -109,7 +110,7 @@ def lambda_handler(event, context):
                         output=response_text))
 
         except Exception as error:
-            logger.error(str(error),exc_info=True)
+            logger.error(str(error), exc_info=True)
 
             if str(error).startswith('Incorrect API key provided'):
                 msg = TextSendMessage(text='OpenAI API Token 有誤，請重新註冊。')
@@ -120,8 +121,8 @@ def lambda_handler(event, context):
 
             else:
                 msg = TextSendMessage(
-                    text='系統遇到一些錯誤，請截圖提供以下訊息給管理員。\n' + \
-                         'User ID: ' + user_id + \
+                    text='系統遇到一些錯誤，請截圖提供以下訊息給管理員。\n' +
+                         'User ID: ' + user_id +
                          'Meet Error: ' + str(error))
 
         line_bot_api.reply_message(event.reply_token, msg)
