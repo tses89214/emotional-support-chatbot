@@ -34,7 +34,7 @@ def test_dynamodb_handler(lambda_input, monkeypatch):
 
         # Create the DynamoDB table.
         dynamodb.create_table(
-            TableName='users',
+            TableName='user',
             KeySchema=[{
                 'AttributeName': 'user_id',
                 'KeyType': 'HASH'
@@ -46,7 +46,7 @@ def test_dynamodb_handler(lambda_input, monkeypatch):
             BillingMode='PAY_PER_REQUEST',
         )
         dynamodb.create_table(
-            TableName='logs',
+            TableName='log',
             KeySchema=[
                 {
                     'AttributeName': 'user_id',

@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 
 import requests
 
-from src.models.user import User
+from src.models.prompt import Prompt
 
 
 class OpenAIAgent:
@@ -69,13 +69,13 @@ class OpenAIAgent:
         return self._request('GET', '/models')[0]
 
     def chat_completions(
-        self, user: User, history: List[Dict], text: str) \
+        self, prompt: Prompt, history: List[Dict], text: str) \
             -> Tuple[bool, Dict, str]:
         """
         Get chat completions from the OpenAI model based on the input messages.
 
         Params:
-            user (User): The User.
+            prompt (Prompt): The Prompt.
             history (List[Dict[str,str]]): the log from this user.
             text: input text.
 
@@ -104,7 +104,7 @@ class OpenAIAgent:
             None)
         """
         messages = self.log_formatting(
-            prompt=user.prompt, history=history
+            prompt=prompt.prompt, history=history
         )
         messages.append(
             {'role': 'user', 'content': text}
