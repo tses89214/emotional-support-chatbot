@@ -29,6 +29,7 @@ from linebot.models import \
 
 from src.models.user import User
 from src.models.log import Log
+from src.models.prompt import Prompt
 from src.models.dynamodb_handler import DynamoDBHandler
 from src.models.openai_agent import OpenAIAgent
 
@@ -66,9 +67,11 @@ def lambda_handler(event, context):
         if not users_prompt.get(user_id):
             susscess, user = dynamodb.get_user(user_id)
             if susscess:
-                users_prompt[user.user_id] = user.prompt
+                users_prompt[user.user_id] = dynamodb.get_prompt(user=user)
             else:
-                user = User(user_id=user_id, prompt=default_prompt)
+                user = User(user_id=user_id,
+                            create_at=int(time.time()),
+                            status='active')
                 dynamodb.add_user(user)
                 users_prompt[user_id] = default_prompt
 
@@ -80,7 +83,15 @@ def lambda_handler(event, context):
             if text.startswith('/設定指令'):
                 prompt = re.sub('/設定指令', '', text)
                 users_prompt[user_id] = prompt
-                dynamodb.add_user(User(user_id=user_id, prompt=prompt))
+                dynamodb.add_user(
+                    User(user_id=user_id, create_at=int(time.time()), status='active'))
+                dynamodb.add_prompt(Prompt(
+                    user_id=user_id,
+                    prompt=default_prompt,
+                    valid_from=int(time.time()),
+                    valid_to=int(time.time()) + 3600 * 24 * 7,
+                    is_current=True
+                ))
                 msg = TextSendMessage(text='設定完成')
 
             # feature2: regular text message response
@@ -103,11 +114,12 @@ def lambda_handler(event, context):
                 msg = TextSendMessage(text=response_text)
                 dynamodb.write_log(
                     Log(
-                        timestamp=int(time.time()),
                         user_id=user_id,
-                        prompt=users_prompt[user_id],
                         input_=text,
-                        output=response_text))
+                        output=response_text,
+                        timestamp=int(time.time())
+                    )
+                )
 
         except Exception as error:
             logger.error(str(error), exc_info=True)

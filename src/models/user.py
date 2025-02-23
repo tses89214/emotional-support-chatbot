@@ -4,14 +4,16 @@ class User:
     We define the structure of an user here.
     """
 
-    def __init__(self, user_id: str, prompt: str):
+    def __init__(self, user_id: str, create_at: int, status: str):
         """
         Params:
             user_id (str): user's id.
-            prompt (str): the command we gave gpt.
+            create_at (int): the timestamp of user's creation.
+            status (str): the status of user.
         """
         self._user_id = user_id
-        self._prompt = prompt
+        self._create_at = create_at
+        self._status = status
 
     @property
     def user_id(self):
@@ -19,19 +21,14 @@ class User:
         return self._user_id
 
     @property
-    def prompt(self):
-        """The prompt property."""
-        return self._prompt
+    def create_at(self):
+        """The create_at property."""
+        return self._create_at
 
-    @prompt.setter
-    def set_prompt(self, new_prompt: str):
-        """
-        We allow user to set prompt.
-
-        Params:
-            prompt (str): The prompt want to set.
-        """
-        self._prompt = new_prompt
+    @property
+    def status(self):
+        """The status property."""
+        return self._status
 
     def to_item(self):
         """
@@ -39,5 +36,6 @@ class User:
         """
         return {
             'user_id': self._user_id,
-            'prompt': self._prompt
+            'create_at': self._create_at,
+            'status': self._status
         }

@@ -6,6 +6,7 @@ from boto3.dynamodb.conditions import Key
 
 from src.models.user import User
 from src.models.log import Log
+from src.models.prompt import Prompt
 from src.models.dynamodb_connector import DynamoDBConnector
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,8 @@ class DynamoDBHandler:
         )
         if response['Items']:
             item = response['Items'][0]
-            return True, User(user_id=item['user_id'], prompt=item['prompt'])
+            return True, User(
+                user_id=item['user_id'], create_at=item['create_at'], status=item['status'])
         else:
             return False, None
 
@@ -71,9 +73,6 @@ class DynamoDBHandler:
                 "output":"我是 ChatGPT",
                 "prompt":"你是有禮貌的機器人"
             }]
-
-        NOTE:
-            maybe use user_id directly will be better?
         """
         condition = Key('user_id').eq(user.user_id)
 
@@ -94,3 +93,59 @@ class DynamoDBHandler:
         """
         response = self.db.log_table.put_item(Item=log.to_item())
         logger.info("PutItem succeeded: %s", response)
+
+    def get_prompt(self, user: User) -> Prompt:
+        """
+        Get prompt from prompt table.
+
+        Params:
+            user (User): an User object.
+        """
+        response = self.db.prompt_table.query(
+            KeyConditionExpression=Key('user_id').eq(user.user_id)
+        )
+        if response['Items']:
+            item = [item for item in response['Items'] if item['is_current']]
+            return True, Prompt(
+                user_id=item['user_id'],
+                prompt=item['prompt'],
+                valid_from=item['valid_from'],
+                valid_to=item['valid_to'],
+                is_current=item['is_current']
+            )
+        else:
+            raise LookupError('No prompt found')
+
+    def add_prompt(self, prompt: Prompt) -> bool:
+        """
+        Add prompt to prompt table.
+
+        Params:
+            prompt (Prompt): a Prompt object.
+        """
+        response = self.db.prompt_table.put_item(Item=prompt.to_item())
+        logger.info("PutItem succeeded: %s", response)
+        return True
+
+    def update_prompt(self, prompt: Prompt) -> bool:
+        """
+        Update prompt to prompt table.
+
+        Params:
+            prompt (Prompt): a Prompt object.
+        """
+        response = self.db.prompt_table.update_item(
+            Key={
+                'user_id': prompt.user_id
+            },
+            UpdateExpression='set prompt = :p, valid_from = :vf, valid_to = :vt, is_current = :ic',
+            ExpressionAttributeValues={
+                ':p': prompt.prompt,
+                ':vf': prompt.valid_from,
+                ':vt': prompt.valid_to,
+                ':ic': prompt.is_current
+            },
+            ReturnValues='ALL_NEW'
+        )
+        logger.info("UpdateItem succeeded: %s", response)
+        return True
