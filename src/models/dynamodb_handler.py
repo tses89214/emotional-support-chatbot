@@ -1,5 +1,6 @@
 # pylint: disable=missing-module-docstring
 import logging
+import time
 from typing import List, Dict, Union
 
 from boto3.dynamodb.conditions import Key
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class DynamoDBHandler:
     """
     A class for reading and writing data to DynamoDB,
-    included users and logs.
+    included user and log.
     """
 
     def __init__(self, region_name='ap-northeast-1'):
@@ -29,7 +30,7 @@ class DynamoDBHandler:
 
     def get_user(self, user_id: str) -> User:
         """
-        Get user's profile from Users table, including id and prompt.
+        Get user's profile from user table, including id and prompt.
 
         Params:
             user_id (str): user's id.
@@ -46,7 +47,7 @@ class DynamoDBHandler:
 
     def add_user(self, user: User) -> bool:
         """
-        Add user to Users table. If user_id exists, record will be overwrite.
+        Add user to user table. If user_id exists, record will be overwrite.
 
         Params:
             user (User): an User object.
@@ -58,14 +59,14 @@ class DynamoDBHandler:
     def get_log(self, user: User, n: int = 10) \
             -> List[Dict[str, Union[str, int]]]:
         """
-        Get n records of an users' from log table.
+        Get n records of an user' from log table.
 
         Params:
             user (User): an User object.
             n (int): number of record we want to get. Default is 10.
 
         Returns:
-            logs of an user (List of Dict), like:
+            log of an user (List of Dict), like:
             [{
                 "user_id":"abc",
                 "timestamp":123456,
@@ -106,6 +107,7 @@ class DynamoDBHandler:
         )
         if response['Items']:
             item = [item for item in response['Items'] if item['is_current']]
+            item = item[0]
             return True, Prompt(
                 user_id=item['user_id'],
                 prompt=item['prompt'],
@@ -123,29 +125,41 @@ class DynamoDBHandler:
         Params:
             prompt (Prompt): a Prompt object.
         """
-        response = self.db.prompt_table.put_item(Item=prompt.to_item())
+        response = self.db.prompt_table.put_item(
+            Item=prompt.to_item()
+        )
         logger.info("PutItem succeeded: %s", response)
         return True
 
-    def update_prompt(self, prompt: Prompt) -> bool:
+    def update_prompt(self, new_prompt: Prompt) -> bool:
         """
         Update prompt to prompt table.
+            1. Get old prompt
+            2. update its `is_current` value as False, `valid_to` as now time.
+            3. put it back
+            4. then put new prompt
 
         Params:
-            prompt (Prompt): a Prompt object.
+            new_prompt (Prompt): a Prompt object.
         """
-        response = self.db.prompt_table.update_item(
-            Key={
-                'user_id': prompt.user_id
-            },
-            UpdateExpression='set prompt = :p, valid_from = :vf, valid_to = :vt, is_current = :ic',
-            ExpressionAttributeValues={
-                ':p': prompt.prompt,
-                ':vf': prompt.valid_from,
-                ':vt': prompt.valid_to,
-                ':ic': prompt.is_current
-            },
-            ReturnValues='ALL_NEW'
+        reponse = self.db.prompt_table.query(
+            KeyConditionExpression=Key('user_id').eq(new_prompt.user_id)
         )
-        logger.info("UpdateItem succeeded: %s", response)
-        return True
+        print(reponse)
+        old_prompt = [item for item in reponse['Items']
+                      if item['is_current']]
+        old_prompt = old_prompt[0]
+        if old_prompt:
+            old_prompt = Prompt(
+                user_id=old_prompt['user_id'],
+                prompt=old_prompt['prompt'],
+                valid_from=old_prompt['valid_from'],
+                valid_to=int(time.time()),
+                is_current=False
+            )
+            self.db.prompt_table.put_item(
+                Item=old_prompt.to_item()
+            )
+            self.add_prompt(new_prompt)
+        else:
+            raise LookupError('No prompt found')

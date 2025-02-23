@@ -43,10 +43,22 @@ class Prompt:
         """The valid_to property."""
         return self._valid_to
 
+    @valid_to.setter
+    def valid_to(self, value):
+        """The valid_to property."""
+        assert isinstance(value, int)
+        self._valid_to = value
+
     @property
     def is_current(self):
         """The is_current property."""
         return self._is_current
+
+    @is_current.setter
+    def is_current(self, value):
+        """The is_current property."""
+        assert isinstance(value, bool)
+        self._is_current = value
 
     def to_item(self):
         """

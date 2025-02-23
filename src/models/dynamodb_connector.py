@@ -6,7 +6,7 @@ from boto3.dynamodb import table
 class DynamoDBConnector:
     """
     DynamoDB connector provides a simple interface for connecting to DynamoDB.
-    Currently, it is designed to work with two tables: 'users' and 'logs'.
+    Currently, it is designed to work with two tables: 'user' and 'log'.
     You can modify the class to accommodate additional use cases.
     """
 

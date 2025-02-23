@@ -1,7 +1,7 @@
 import requests_mock
 
 from src.models.openai_agent import OpenAIAgent
-from src.models.user import User
+from src.models.prompt import Prompt
 
 
 def test_openai_agent():
@@ -23,7 +23,13 @@ def test_openai_agent():
         m.post('https://api.openai.com/v1/chat/completions',
                text='{"response":"ok"}')
         assert agent.chat_completions(
-            user=User(user_id='test_id', prompt='test_prompt'),
+            prompt=Prompt(
+                user_id='test_user',
+                prompt='test_prompt',
+                valid_from=12345,
+                valid_to=12345 + 3600 * 24 * 7,
+                is_current=True
+            ),
             history=[],
             text='test_input'
         )[0] is True
@@ -32,7 +38,13 @@ def test_openai_agent():
                text='{"error":{"message":"meet_error"}}')
 
         assert agent.chat_completions(
-            user=User(user_id='test_id', prompt='test_prompt'),
+            prompt=Prompt(
+                user_id='test_user',
+                prompt='test_prompt',
+                valid_from=12345,
+                valid_to=12345 + 3600 * 24 * 7,
+                is_current=True
+            ),
             history=[],
             text='test_input'
         )[0] is False
