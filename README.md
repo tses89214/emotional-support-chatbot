@@ -50,8 +50,8 @@
 
 使用 DynamoDB 儲存數據，包含以下表格：
 
-1. **Users：** 紀錄使用者ID、以及使用的 prompt。
-2. **Logs：** 紀錄使用者輸入的句子、當下使用的 prompt、ChatGPT 的回應，以及其他相關參數。
+1. **user：** 紀錄使用者ID、以及使用的 prompt。
+2. **log：** 紀錄使用者輸入的句子、當下使用的 prompt、ChatGPT 的回應，以及其他相關參數。
 
 ![數據結構](./docs/images/data_structure.PNG)
 

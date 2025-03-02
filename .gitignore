@@ -32,7 +32,7 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
+# Installer log
 pip-log.txt
 pip-delete-this-directory.txt
 
@@ -162,3 +162,4 @@ cython_debug/
 .vscode/
 test.ipynb
 test.md
+*.drawio

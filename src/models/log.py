@@ -6,19 +6,15 @@ class Log:
 
     def __init__(
             self,
-            user_id: str, prompt: str,
-            input_: str, output: str,
-            timestamp: int):
+            user_id: str, input_: str, output: str, timestamp: int):
         """
         Params:
             user_id (str): User's id.
-            prompt (str): the command we gave gpt.
             input_ (str): the user's input to gpt.
             output (str): the response from gpt.
             timestamp (int): the timestamp of log. 
         """
         self._user_id = user_id
-        self._prompt = prompt
         self._input = input_
         self._output = output
         self._timestamp = timestamp
@@ -27,11 +23,6 @@ class Log:
     def user_id(self):
         """The user_id property."""
         return self._user_id
-
-    @property
-    def prompt(self):
-        """The prompt property."""
-        return self._prompt
 
     @property
     def input_(self):
@@ -54,7 +45,6 @@ class Log:
         """
         return {
             'user_id': self._user_id,
-            'prompt': self._prompt,
             'input': self._input,
             'output': self._output,
             'timestamp': self._timestamp
